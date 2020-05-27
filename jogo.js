@@ -31,15 +31,15 @@ const background= {
         // Desenha outra parte do fundo
         contexto.drawImage(
             sprites,
-            background.spriteX, background.spriteY, //sprite x e sprite y - define altura na img.
-            background.largura, background.altura, //tamanho recorte na sprite - altura e largura.
-            (background.x + background.largura), background.y, //em que posição a imagem vai aparecer na tela.
-            background.largura, background.altura, //tamanho do recorte na sprite dentro do canvas.
+            background.spriteX, background.spriteY, //sprite x e sprite y - define altura na img [...]
+            background.largura, background.altura, 
+            (background.x + background.largura), background.y, 
+            background.largura, background.altura, 
         );
     }
 }
 
-// Objeto que guarda infos da img - [Chão]
+// Objeto [...] - [Chão]
 const floor = {
     spriteX : 0,
     spriteY : 610,
@@ -69,7 +69,7 @@ const floor = {
     }
 }
 
-// Objeto que guarda infos da img - [Pássaro]
+// Objeto [...] - [Pássaro]
 const flappyBird = {
     spriteX : 0,
     spriteY : 0,
@@ -90,21 +90,83 @@ const flappyBird = {
     desenha(){
         contexto.drawImage(
             sprites,
-            flappyBird.spriteX, flappyBird.spriteY, //sprite x e sprite y - define altura na img.
-            flappyBird.largura, flappyBird.altura, //tamanho recorte na sprite - altura e largura.
-            flappyBird.x, flappyBird.y, //em que posição a imagem vai aparecer na tela.
-            flappyBird.largura, flappyBird.altura, //tamanho do recorte na sprite dentro do canvas.
+            flappyBird.spriteX, flappyBird.spriteY, //sprite x e sprite y - define altura na img.[...]
+            flappyBird.largura, flappyBird.altura, 
+            flappyBird.x, flappyBird.y, 
+            flappyBird.largura, flappyBird.altura, 
         );
     }
 }
 
+// Objeto [...] - [Tela Inicial]
+const msgGetReady = {
+    sX : 134,
+    sY : 0,
+    w : 174,
+    h : 152,
+    x : (canvas.width / 2) - 174 / 2,
+    y : 50,
+    
+        desenha(){
+        contexto.drawImage(
+            sprites,
+            msgGetReady.sX, msgGetReady.sY,
+            msgGetReady.w, msgGetReady.h,
+            msgGetReady.x, msgGetReady.y,
+            msgGetReady.w, msgGetReady.h,
+        );
+    }
+}
+
+// [Telas]
+let telaAtiva = {};
+
+function mudaParaTela(novaTela){
+    telaAtiva = novaTela;
+}
+
+
+const Telas = {
+    INICIO : {
+        desenha(){
+            background.desenha();
+            floor.desenha();
+            flappyBird.desenha();
+            msgGetReady.desenha();
+        },
+        click(){
+            mudaParaTela(Telas.JOGO);
+        },
+        atualiza(){
+
+        }
+    }
+};
+
+Telas.JOGO = {
+    desenha(){
+        background.desenha();
+        floor.desenha();
+        flappyBird.desenha();
+    },
+    atualiza(){
+        flappyBird.atualiza();
+    }
+};
+
 function loop(){
-    flappyBird.atualiza();
-    background.desenha();
-    floor.desenha();
-    flappyBird.desenha();    
+
+    telaAtiva.desenha();
+    telaAtiva.atualiza();
 
     requestAnimationFrame(loop);
 }
 
+window.addEventListener('click', function(){
+    if (telaAtiva.click){
+        telaAtiva.click();
+    }
+});
+
+mudaParaTela(Telas.INICIO);
 loop();
