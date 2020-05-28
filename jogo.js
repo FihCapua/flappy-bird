@@ -1,3 +1,6 @@
+const som_HIT = new Audio();
+som_HIT.src = './efeitos/hit.wav';
+
 console.log ("Flappy Bird");
 
 const sprites = new Image();
@@ -69,33 +72,65 @@ const floor = {
     }
 }
 
-// Objeto [...] - [Pássaro]
-const flappyBird = {
-    spriteX : 0,
-    spriteY : 0,
-    largura : 33,
-    altura : 24,
-    x : 10,
-    y : 50,
-    gravidade : 0.25,
-    velocidade : 0,
+//passaro faz colisão c/ o chão
+function fazColisao(flappyBird, floor){
+    const flappyBirdY = flappyBird.y + flappyBird.altura;
+    const floorY = floor.y;
 
-    // Função que atualiza antes de rodar
-    atualiza(){
-        flappyBird.velocidade = flappyBird.velocidade + flappyBird.gravidade;
-        flappyBird.y = flappyBird.y + flappyBird.velocidade;
-    },
-
-    // Função que desenha a img na tela
-    desenha(){
-        contexto.drawImage(
-            sprites,
-            flappyBird.spriteX, flappyBird.spriteY, //sprite x e sprite y - define altura na img.[...]
-            flappyBird.largura, flappyBird.altura, 
-            flappyBird.x, flappyBird.y, 
-            flappyBird.largura, flappyBird.altura, 
-        );
+    if (flappyBirdY >= floorY){
+        return true;
     }
+    return false;
+}
+
+// Objeto [...] - [Pássaro]
+function criaFlappyBird(){
+    const flappyBird = {
+        spriteX : 0,
+        spriteY : 0,
+        largura : 33,
+        altura : 24,
+        x : 10,
+        y : 50,
+        pulo : 4.6,
+        pula(){
+            flappyBird.velocidade = - flappyBird.pulo;
+        },
+        gravidade : 0.25,
+        velocidade : 0,
+    
+        // Função que atualiza antes de rodar
+        atualiza(){
+            if(fazColisao(flappyBird, floor)){
+                console.log('fez colisão');
+                
+                som_HIT.play(); //som quando o pássaro cai
+                
+                // tempo de delay entre o final de um jogo e a tela inicial
+                setTimeout(() =>{
+                    mudaParaTela(Telas.INICIO);
+                }, 500);
+
+                return;
+            }
+    
+            flappyBird.velocidade = flappyBird.velocidade + flappyBird.gravidade;
+            flappyBird.y = flappyBird.y + flappyBird.velocidade;
+        },
+    
+        // Função que desenha a img na tela
+        desenha(){
+            contexto.drawImage(
+                sprites,
+                flappyBird.spriteX, flappyBird.spriteY, //sprite x e sprite y - define altura na img.[...]
+                flappyBird.largura, flappyBird.altura, 
+                flappyBird.x, flappyBird.y, 
+                flappyBird.largura, flappyBird.altura, 
+            );
+        }
+    }
+
+    return flappyBird;
 }
 
 // Objeto [...] - [Tela Inicial]
@@ -119,19 +154,28 @@ const msgGetReady = {
 }
 
 // [Telas]
+
+const globais = {}; // acessa tudo que for global, que se queira acessar na(s) tela(s)
 let telaAtiva = {};
 
 function mudaParaTela(novaTela){
     telaAtiva = novaTela;
+
+    if (telaAtiva.inicializa){
+        telaAtiva.inicializa();
+    }
 }
 
 
 const Telas = {
     INICIO : {
+        inicializa(){
+            globais.flappyBird =  criaFlappyBird();
+        },
         desenha(){
             background.desenha();
             floor.desenha();
-            flappyBird.desenha();
+            globais.flappyBird.desenha();
             msgGetReady.desenha();
         },
         click(){
@@ -147,10 +191,13 @@ Telas.JOGO = {
     desenha(){
         background.desenha();
         floor.desenha();
-        flappyBird.desenha();
+        globais.flappyBird.desenha();
+    },
+    click(){
+        globais.flappyBird.pula();
     },
     atualiza(){
-        flappyBird.atualiza();
+        globais.flappyBird.atualiza();
     }
 };
 
